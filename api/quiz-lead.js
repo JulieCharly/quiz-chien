@@ -1,10 +1,9 @@
-// Receives leads from public/quiz-avion-chien.html and forwards them to
-// systeme.io as contacts, so Julie can build a newsletter from the quiz.
-// The systeme.io API key never reaches the browser — it only lives here,
-// as a Vercel environment variable (SYSTEME_API_KEY).
+// Receives leads from index.html and emails Julie a notification for each
+// completed quiz (name, dog's name, email, score, weak points), so she can
+// collect them manually for now. The Resend API key never reaches the
+// browser — it only lives here, as a Vercel environment variable.
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const SYSTEME_API_BASE = "https://api.systeme.io/api";
 
 function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -22,58 +21,10 @@ function readBody(req) {
   });
 }
 
-function buildCustomFields({ dogName, score, weakCategories }) {
-  const fields = [];
-  if (process.env.SYSTEME_FIELD_DOG_NAME && dogName) {
-    fields.push({ slug: process.env.SYSTEME_FIELD_DOG_NAME, value: String(dogName).slice(0, 200) });
-  }
-  if (process.env.SYSTEME_FIELD_SCORE && typeof score === "number") {
-    fields.push({ slug: process.env.SYSTEME_FIELD_SCORE, value: String(score) });
-  }
-  if (process.env.SYSTEME_FIELD_WEAK_POINTS && Array.isArray(weakCategories)) {
-    fields.push({ slug: process.env.SYSTEME_FIELD_WEAK_POINTS, value: weakCategories.join(", ").slice(0, 500) });
-  }
-  return fields;
-}
-
-async function upsertSystemeContact(apiKey, { email, firstName, fields }) {
-  const createRes = await fetch(`${SYSTEME_API_BASE}/contacts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
-    body: JSON.stringify({
-      email,
-      firstName,
-      ...(fields.length ? { fields } : {}),
-    }),
-  });
-
-  if (createRes.ok) return { ok: true };
-
-  // Contact already exists: look it up and patch its custom fields instead.
-  if (createRes.status === 422 || createRes.status === 409) {
-    const searchRes = await fetch(`${SYSTEME_API_BASE}/contacts?email=${encodeURIComponent(email)}`, {
-      headers: { "X-API-Key": apiKey },
-    });
-    if (searchRes.ok) {
-      const searchData = await searchRes.json();
-      const existing = Array.isArray(searchData.items) ? searchData.items[0] : Array.isArray(searchData) ? searchData[0] : null;
-      if (existing && existing.id && fields.length) {
-        const updateRes = await fetch(`${SYSTEME_API_BASE}/contacts/${existing.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/merge-patch+json", "X-API-Key": apiKey },
-          body: JSON.stringify({ fields }),
-        });
-        if (updateRes.ok) return { ok: true };
-        const updateErr = await updateRes.text();
-        return { ok: false, status: updateRes.status, detail: updateErr };
-      }
-      // Contact exists and there's nothing new to patch (no custom fields configured).
-      if (existing) return { ok: true };
-    }
-  }
-
-  const createErr = await createRes.text();
-  return { ok: false, status: createRes.status, detail: createErr };
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
 }
 
 export default async function handler(req, res) {
@@ -105,24 +56,47 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Champs manquants ou invalides" });
   }
 
-  const apiKey = process.env.SYSTEME_API_KEY;
-  if (!apiKey) {
-    console.error("quiz-lead: SYSTEME_API_KEY manquante");
+  const apiKey = process.env.RESEND_API_KEY;
+  const notifyTo = process.env.NOTIFY_EMAIL;
+  if (!apiKey || !notifyTo) {
+    console.error("quiz-lead: RESEND_API_KEY ou NOTIFY_EMAIL manquant");
     return res.status(500).json({ error: "Configuration serveur manquante" });
   }
 
-  try {
-    const fields = buildCustomFields({ dogName, score, weakCategories });
-    const result = await upsertSystemeContact(apiKey, { email, firstName, fields });
+  const scoreLabel = typeof score === "number" ? `${score}%` : "inconnu";
+  const weakLabel = weakCategories.length ? weakCategories.join(", ") : "aucun (score parfait)";
 
-    if (!result.ok) {
-      console.error("quiz-lead: systeme.io a refusé la requête", result.status, result.detail);
-      return res.status(502).json({ error: "Erreur lors de l'enregistrement" });
+  const html = `
+    <h2>Nouvelle réponse au quiz avion 🐾✈️</h2>
+    <p><strong>Prénom :</strong> ${escapeHtml(firstName)}</p>
+    <p><strong>Chien :</strong> ${escapeHtml(dogName)}</p>
+    <p><strong>Email :</strong> ${escapeHtml(email)}</p>
+    <p><strong>Score de préparation :</strong> ${scoreLabel}</p>
+    <p><strong>Points à travailler :</strong> ${escapeHtml(weakLabel)}</p>
+  `.trim();
+
+  try {
+    const sendRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || "Quiz avion chien <onboarding@resend.dev>",
+        to: [notifyTo],
+        subject: `Quiz : ${firstName} & ${dogName} (${scoreLabel})`,
+        html,
+        reply_to: email,
+      }),
+    });
+
+    if (!sendRes.ok) {
+      const errText = await sendRes.text();
+      console.error("quiz-lead: Resend a refusé la requête", sendRes.status, errText);
+      return res.status(502).json({ error: "Erreur lors de l'envoi" });
     }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("quiz-lead: appel systeme.io échoué", err);
+    console.error("quiz-lead: appel Resend échoué", err);
     return res.status(502).json({ error: "Erreur réseau" });
   }
 }
