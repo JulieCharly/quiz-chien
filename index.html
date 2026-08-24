@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Es-tu prêt(e) à prendre l'avion avec ton chien ?</title>
+<meta name="description" content="Fais le quiz de Julie & Charly et découvre si tu es vraiment prêt(e) à voyager en avion avec ton chien.">
+<meta name="theme-color" content="#C2410C">
+<style>
+  :root{
+    --cream:#FFF8F0;
+    --cream-2:#FFF1E0;
+    --ink:#3A2A1E;
+    --ink-soft:#6B5A4C;
+    --orange:#C2410C;
+    --orange-dark:#9A3410;
+    --orange-light:#FDBA74;
+    --peach:#FFD9B8;
+    --teal:#0F766E;
+    --teal-light:#CCFBF1;
+    --white:#FFFFFF;
+    --ok:#0F766E;
+    --warn:#B45309;
+    --bad:#B91C1C;
+    --radius:20px;
+    --shadow: 0 10px 30px rgba(58, 42, 30, 0.12);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+  }
+
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 8%, #FFE7C7 0%, transparent 45%),
+      radial-gradient(circle at 90% 0%, #CFF3EE 0%, transparent 40%),
+      var(--cream);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .app{
+    width:100%;
+    max-width:520px;
+    min-height:100vh;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* Decorative floating paws */
+  .deco-paw{
+    position:absolute;
+    font-size: 28px;
+    opacity:0.18;
+    pointer-events:none;
+    animation: floaty 6s ease-in-out infinite;
+    user-select:none;
+  }
+  .deco-paw.p1{ top:6%; left:4%; animation-delay:0s; }
+  .deco-paw.p2{ top:14%; right:6%; font-size:22px; animation-delay:1.2s; }
+  .deco-paw.p3{ bottom:10%; left:8%; font-size:20px; animation-delay:2.1s; }
+  @keyframes floaty{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-10px) rotate(8deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .deco-paw{ animation:none; }
+  }
+
+  header.top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+    z-index:1;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    font-size:15px;
+    color:var(--ink-soft);
+    letter-spacing:0.2px;
+  }
+  .brand .badge{
+    width:34px;height:34px;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--orange-light), var(--peach));
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6);
+  }
+
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    z-index:1;
+  }
+
+  /* ---------- Screens ---------- */
+  .screen{
+    display:none;
+    flex-direction:column;
+    flex:1;
+    animation: fadeSlideIn 0.45s ease both;
+  }
+  .screen.active{ display:flex; }
+
+  @keyframes fadeSlideIn{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideOut{
+    from{ opacity:1; transform: translateY(0); }
+    to{ opacity:0; transform: translateY(-14px); }
+  }
+  .screen.leaving{ animation: fadeSlideOut 0.28s ease both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .screen{ animation:none; }
+    .screen.leaving{ animation:none; }
+  }
+
+  /* ---------- Intro ---------- */
+  .intro{
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    gap:18px;
+    padding: 10px 4px 30px;
+  }
+  .mascot{
+    font-size:64px;
+    line-height:1;
+    filter: drop-shadow(0 8px 14px rgba(194,65,12,0.25));
+    animation: bounceIn 0.8s ease;
+  }
+  @keyframes bounceIn{
+    0%{ transform: scale(0.6); opacity:0; }
+    60%{ transform: scale(1.08); opacity:1; }
+    100%{ transform: scale(1); }
+  }
+  .intro h1{
+    font-size: clamp(24px, 6.5vw, 30px);
+    line-height:1.25;
+    margin:0;
+    font-weight:800;
+    color:var(--ink);
+  }
+  .intro h1 span{ color:var(--orange); }
+  .intro p.lede{
+    margin:0;
+    font-size:16px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    max-width:38ch;
+  }
+  .intro .meta{
+    display:flex;
+    gap:14px;
+    font-size:13px;
+    color:var(--ink-soft);
+    font-weight:600;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .intro .meta span{
+    display:flex; align-items:center; gap:6px;
+    background:var(--white);
+    padding:7px 12px;
+    border-radius:999px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:800;
+    font-size:17px;
+    border-radius:999px;
+    padding:16px 28px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    text-decoration:none;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn:focus-visible{
+    outline: 3px solid var(--teal);
+    outline-offset: 3px;
+  }
+  .btn-primary{
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color:#fff;
+    box-shadow: 0 10px 24px rgba(194,65,12,0.35);
+    width:100%;
+  }
+  .btn-primary:hover{ box-shadow: 0 14px 28px rgba(194,65,12,0.42); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    font-weight:700;
+    font-size:15px;
+    padding:10px 16px;
+  }
+  .btn-secondary{
+    background: var(--white);
+    color:var(--ink);
+    box-shadow: var(--shadow);
+    width:100%;
+  }
+
+  /* ---------- Quiz ---------- */
+  .quiz{
+    gap:22px;
+    padding-top:6px;
+  }
+  .progress-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .progress-track{
+    height:10px;
+    background: var(--cream-2);
+    border-radius:999px;
+    overflow:hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, var(--orange-light), var(--orange));
+    border-radius:999px;
+    transition: width 0.45s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .q-card{
+    background:var(--white);
+    border-radius: var(--radius);
+    padding:24px 20px;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .q-icon{
+    font-size:34px;
+    line-height:1;
+  }
+  .q-category{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--teal);
+  }
+  .q-text{
+    font-size: clamp(18px, 5vw, 21px);
+    font-weight:800;
+    line-height:1.4;
+    margin:0;
+    color:var(--ink);
+  }
+
+  .answers{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .answer-btn{
+    text-align:left;
+    background: var(--cream);
+    border:2px solid transparent;
+    border-radius:14px;
+    padding:14px 16px;
+    font-family:inherit;
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--ink);
+    line-height:1.4;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .answer-btn:hover{
+    border-color: var(--orange-light);
+    background: #FFF3E4;
+  }
+  .answer-btn:active{ transform: scale(0.99); }
+  .answer-btn:focus-visible{
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+  .answer-btn.selected{
+    border-color: var(--orange);
+    background: #FFEFE0;
+  }
+  .answer-letter{
+    flex:0 0 auto;
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--white);
+    color:var(--orange-dark);
+    font-weight:800;
+    font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: inset 0 0 0 2px var(--peach);
+  }
+
+  .back-link{
+    align-self:flex-start;
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    padding:6px 2px;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .back-link:focus-visible{ outline: 2px solid var(--teal); border-radius:6px; }
+
+  /* ---------- Capture ---------- */
+  .capture{
+    gap:18px;
+    padding-top:6px;
+  }
+  .capture-card{
+    background:var(--white);
+    border-radius:var(--radius);
+    padding:26px 20px;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    text-align:center;
+  }
+  .capture-icon{
+    font-size:40px;
+    line-height:1;
+  }
+  .capture-card h1{
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--ink);
+  }
+  .capture-lede{
+    margin:0;
+    font-size:14.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+  }
+  #capture-form{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    text-align:left;
+    margin-top:4px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input{
+    width:100%;
+    font-family:inherit;
+    font-size:16px;
+    padding:13px 14px;
+    border-radius:12px;
+    border:2px solid var(--cream-2);
+    background:var(--cream);
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--orange);
+    background:#fff;
+  }
+  .field input:focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:2px;
+  }
+  .hp-field{
+    position:absolute;
+    left:-9999px;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+  }
+  .consent-text{
+    margin:0;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .form-error{
+    margin:0;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--bad);
+    background:#FEE2E2;
+    padding:10px 12px;
+    border-radius:10px;
+  }
+
+  /* ---------- Result ---------- */
+  .result{
+    gap:22px;
+    padding-top:4px;
+  }
+  .result-hero{
+    background:var(--white);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:26px 20px 22px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+  .ring-wrap{
+    position:relative;
+    width:168px;
+    height:168px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:4px;
+  }
+  .ring-wrap svg{ width:100%; height:100%; transform: rotate(-90deg); }
+  .ring-bg{ fill:none; stroke:var(--cream-2); stroke-width:14; }
+  .ring-fill{
+    fill:none;
+    stroke:url(#ringGradient);
+    stroke-width:14;
+    stroke-linecap:round;
+    transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-center{
+    position:absolute;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  .ring-percent{
+    font-size:34px;
+    font-weight:900;
+    color:var(--ink);
+  }
+  .ring-caption{
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+  }
+  .result-greeting{
+    margin:0;
+    font-size:12.5px;
+    font-weight:800;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--teal);
+  }
+  .result-title{
+    font-size:20px;
+    font-weight:800;
+    margin:2px 0 0;
+    color:var(--ink);
+  }
+  .result-text{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    margin:0;
+    max-width:40ch;
+  }
+
+  .breakdown{
+    background:var(--white);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px 18px 6px;
+  }
+  .breakdown h2{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+    font-weight:800;
+  }
+  .cat-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 0;
+    border-top:1px solid var(--cream-2);
+  }
+  .cat-row:first-of-type{ border-top:none; }
+  .cat-icon-badge{
+    width:36px;height:36px;
+    border-radius:10px;
+    background:var(--cream);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+    flex:0 0 auto;
+  }
+  .cat-name{
+    flex:1;
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .cat-indicator{
+    font-size:19px;
+    flex:0 0 auto;
+  }
+
+  .sell-block{
+    background: linear-gradient(160deg, var(--orange-dark), var(--orange));
+    border-radius:var(--radius);
+    padding:24px 20px;
+    color:#fff;
+    box-shadow: 0 16px 34px rgba(154,52,16,0.38);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .sell-eyebrow{
+    font-size:12px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--peach);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .sell-focus{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .sell-focus .chip{
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.35);
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+  }
+  .sell-block p{
+    margin:0;
+    font-size:15px;
+    line-height:1.55;
+  }
+  .sell-block .btn-primary{
+    background:#fff;
+    color:var(--orange-dark);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    font-size:17px;
+    margin-top:4px;
+  }
+  .sell-block .btn-primary:hover{ background:#FFF6EC; }
+
+  .congrats-block{
+    background:var(--teal-light);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+  }
+  .congrats-block .emoji{ font-size:36px; }
+  .congrats-block p{
+    margin:0;
+    color:#0B4A44;
+    font-size:14.5px;
+    line-height:1.55;
+    max-width:38ch;
+  }
+  .discreet-link{
+    color:var(--orange-dark);
+    font-weight:800;
+    font-size:14.5px;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .discreet-link:focus-visible{ outline:2px solid var(--teal); border-radius:4px; }
+
+  .share-row{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:700;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index:50;
+    white-space:nowrap;
+  }
+  .toast.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  footer.foot{
+    text-align:center;
+    margin-top:22px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    z-index:1;
+  }
+  footer.foot a{ color:var(--ink-soft); }
+
+  @media (min-width:600px){
+    .app{ padding-top:40px; }
+  }
+
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;border:0;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <span class="deco-paw p1" aria-hidden="true">🐾</span>
+  <span class="deco-paw p2" aria-hidden="true">✈️</span>
+  <span class="deco-paw p3" aria-hidden="true">🐾</span>
+
+  <header class="top">
+    <div class="brand">
+      <span class="badge" aria-hidden="true">🐶</span>
+      Julie &amp; Charly · @mylittlecharly_
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- INTRO -->
+    <section class="screen active" id="screen-intro" aria-labelledby="intro-title">
+      <div class="intro">
+        <div class="mascot" aria-hidden="true">🐕‍🦺✈️</div>
+        <h1 id="intro-title">Es-tu prêt(e) à prendre <span>l'avion</span> avec ton chien ?</h1>
+        <p class="lede">6 questions rapides pour savoir où tu en es vraiment — et repartir avec un plan clair pour voyager sereinement avec ta boule de poils.</p>
+        <div class="meta">
+          <span>⏱️ 2 minutes</span>
+          <span>🎯 Résultat perso</span>
+        </div>
+        <button class="btn btn-primary" id="btn-start" type="button" style="margin-top:8px;">Je fais le test 🐾</button>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="screen quiz" id="screen-quiz" aria-labelledby="q-text" hidden>
+      <button class="back-link" id="btn-back" type="button" aria-label="Revenir à la question précédente">← Retour</button>
+      <div class="progress-wrap">
+        <div class="progress-track" role="progressbar" id="progress-bar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Progression du quiz">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progress-text">Question 1 / 6</span>
+          <span id="progress-cat"></span>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-icon" id="q-icon" aria-hidden="true">📋</div>
+        <div class="q-category" id="q-category">Formalités</div>
+        <p class="q-text" id="q-text"></p>
+        <div class="answers" id="answers" role="group" aria-label="Choix de réponse"></div>
+      </div>
+    </section>
+
+    <!-- CAPTURE -->
+    <section class="screen capture" id="screen-capture" aria-labelledby="capture-title" hidden>
+      <button class="back-link" id="btn-back-capture" type="button" aria-label="Revenir à la dernière question">← Retour</button>
+
+      <div class="capture-card">
+        <div class="capture-icon" aria-hidden="true">🐾✉️</div>
+        <h1 id="capture-title">Ton résultat est prêt !</h1>
+        <p class="capture-lede">Dis-nous qui tu es pour le débloquer — et reçois par la même occasion les astuces voyage de Julie &amp; Charly.</p>
+
+        <form id="capture-form" novalidate>
+          <div class="field">
+            <label for="f-firstname">Ton prénom</label>
+            <input type="text" id="f-firstname" name="firstname" autocomplete="given-name" required maxlength="60">
+          </div>
+          <div class="field">
+            <label for="f-dogname">Le nom de ton chien</label>
+            <input type="text" id="f-dogname" name="dogname" autocomplete="off" required maxlength="60">
+          </div>
+          <div class="field">
+            <label for="f-email">Ton email</label>
+            <input type="email" id="f-email" name="email" autocomplete="email" required maxlength="150">
+          </div>
+
+          <div class="hp-field" aria-hidden="true">
+            <label for="f-website">Laisser ce champ vide</label>
+            <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <p class="consent-text">En validant, tu acceptes de recevoir les emails de Julie &amp; Charly (ton résultat, des conseils voyage, l'ebook). Désinscription en un clic, à tout moment.</p>
+
+          <p class="form-error" id="capture-error" role="alert" hidden></p>
+
+          <button class="btn btn-primary" type="submit" id="btn-capture-submit">Je découvre mon résultat 🐾</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="screen result" id="screen-result" aria-labelledby="result-title" hidden>
+
+      <div class="result-hero">
+        <p class="result-greeting" id="result-greeting"></p>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 180 180" aria-hidden="true">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FDBA74"/>
+                <stop offset="100%" stop-color="#C2410C"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="90" cy="90" r="76"></circle>
+            <circle class="ring-fill" id="ring-fill" cx="90" cy="90" r="76"></circle>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-percent" id="ring-percent">0%</span>
+            <span class="ring-caption">Préparé</span>
+          </div>
+        </div>
+        <h1 class="result-title" id="result-title"></h1>
+        <p class="result-text" id="result-text"></p>
+      </div>
+
+      <div class="breakdown">
+        <h2>Le détail, thème par thème</h2>
+        <div id="breakdown-list"></div>
+      </div>
+
+      <div id="cta-zone"></div>
+
+      <div class="share-row">
+        <button class="btn btn-secondary" id="btn-share" type="button">📤 Partage ton résultat</button>
+        <button class="btn btn-ghost" id="btn-restart" type="button" style="align-self:center;">↺ Refaire le quiz</button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    Un quiz de <strong>Julie &amp; Charly</strong> 🐾 — <a href="https://instagram.com/mylittlecharly_" target="_blank" rel="noopener">@mylittlecharly_</a>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var EBOOK_URL = "https://mylittlecharly.systeme.io/ebook";
+  var LEAD_ENDPOINT = "/api/quiz-lead";
+
+  var QUESTIONS = [
+    {
+      category: "Formalités",
+      icon: "📋",
+      question: "Sais-tu quels documents sont obligatoires pour faire voyager ton chien en avion en Europe ?",
+      answers: [
+        { text: "Oui, j'ai déjà tout vérifié (passeport, puce, vaccins…)", points: 0 },
+        { text: "J'ai une vague idée, mais je ne suis sûr(e) de rien", points: 1 },
+        { text: "Aucune idée, je n'y ai pas encore réfléchi", points: 2 }
+      ]
+    },
+    {
+      category: "Compagnie aérienne",
+      icon: "✈️",
+      question: "As-tu déjà comparé les compagnies aériennes pour savoir lesquelles acceptent les chiens en cabine et à quelles conditions ?",
+      answers: [
+        { text: "Oui, je sais exactement quelle(s) compagnie(s) choisir", points: 0 },
+        { text: "J'en connais une ou deux, sans plus", points: 1 },
+        { text: "Non, je ne savais même pas que ça changeait autant d'une compagnie à l'autre", points: 2 }
+      ]
+    },
+    {
+      category: "Santé",
+      icon: "🩺",
+      question: "Si ton chien a un souci de santé pendant le voyage (à l'étranger), sais-tu comment réagir ?",
+      answers: [
+        { text: "Oui, j'ai déjà repéré des vétérinaires / une trousse de secours prête", points: 0 },
+        { text: "Pas vraiment, je m'en remettrais à trouver une solution sur place", points: 1 },
+        { text: "Pas du tout, ça m'angoisse rien que d'y penser", points: 2 }
+      ]
+    },
+    {
+      category: "Gestion du stress",
+      icon: "🐾",
+      question: "Comment ton chien réagit-il (ou réagirait-il) face au stress d'un voyage en avion ?",
+      answers: [
+        { text: "Il est plutôt zen, et j'ai déjà des techniques pour le rassurer", points: 0 },
+        { text: "Je ne suis pas sûr(e), je n'ai jamais testé", points: 1 },
+        { text: "Il stresse facilement et je ne sais pas comment l'aider", points: 2 }
+      ]
+    },
+    {
+      category: "Budget",
+      icon: "💶",
+      question: "As-tu une idée précise du budget à prévoir pour voyager avec ton chien (billets, papiers, hébergements pet-friendly…) ?",
+      answers: [
+        { text: "Oui, j'ai déjà fait mes calculs", points: 0 },
+        { text: "Une estimation très approximative", points: 1 },
+        { text: "Aucune idée, ça pourrait me surprendre", points: 2 }
+      ]
+    },
+    {
+      category: "Hébergement",
+      icon: "🏡",
+      question: "Sais-tu comment trouver des hébergements vraiment pet-friendly (pas juste « animaux tolérés ») ?",
+      answers: [
+        { text: "Oui, j'ai mes adresses ou méthodes de recherche", points: 0 },
+        { text: "Je cherche au cas par cas, sans méthode particulière", points: 1 },
+        { text: "Non, je n'y ai jamais été confronté(e)", points: 2 }
+      ]
+    }
+  ];
+
+  var LETTERS = ["A", "B", "C"];
+  var TOTAL = QUESTIONS.length;
+  var MAX_POINTS = TOTAL * 2;
+
+  var state = {
+    current: 0,
+    responses: new Array(TOTAL).fill(null), // stores {points} per question
+    lead: null // {firstName, dogName, email}
+  };
+
+  var screenIntro = document.getElementById("screen-intro");
+  var screenQuiz = document.getElementById("screen-quiz");
+  var screenCapture = document.getElementById("screen-capture");
+  var screenResult = document.getElementById("screen-result");
+
+  var btnStart = document.getElementById("btn-start");
+  var btnBack = document.getElementById("btn-back");
+  var btnRestart = document.getElementById("btn-restart");
+  var btnShare = document.getElementById("btn-share");
+
+  var progressFill = document.getElementById("progress-fill");
+  var progressBar = document.getElementById("progress-bar");
+  var progressText = document.getElementById("progress-text");
+  var progressCat = document.getElementById("progress-cat");
+
+  var qIcon = document.getElementById("q-icon");
+  var qCategory = document.getElementById("q-category");
+  var qText = document.getElementById("q-text");
+  var answersEl = document.getElementById("answers");
+
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+  }
+
+  function switchScreen(hideEl, showEl){
+    hideEl.classList.add("leaving");
+    var doSwitch = function(){
+      hideEl.classList.remove("leaving", "active");
+      hideEl.hidden = true;
+      showEl.hidden = false;
+      showEl.classList.add("active");
+      var focusTarget = showEl.querySelector("h1, .q-text");
+      if (focusTarget){
+        focusTarget.setAttribute("tabindex", "-1");
+        focusTarget.focus({ preventScroll: false });
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion){
+      doSwitch();
+    } else {
+      setTimeout(doSwitch, 260);
+    }
+  }
+
+  function renderQuestion(){
+    var idx = state.current;
+    var q = QUESTIONS[idx];
+
+    qIcon.textContent = q.icon;
+    qCategory.textContent = q.category;
+    qText.textContent = q.question;
+
+    progressText.textContent = "Question " + (idx + 1) + " / " + TOTAL;
+    progressCat.textContent = q.category;
+    var pct = (idx / TOTAL) * 100;
+    progressFill.style.width = pct + "%";
+    progressBar.setAttribute("aria-valuenow", String(idx));
+
+    answersEl.innerHTML = "";
+    q.answers.forEach(function(ans, i){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "answer-btn";
+      btn.setAttribute("data-points", ans.points);
+      if (state.responses[idx] && state.responses[idx].points === ans.points){
+        btn.classList.add("selected");
+      }
+      var letter = document.createElement("span");
+      letter.className = "answer-letter";
+      letter.setAttribute("aria-hidden", "true");
+      letter.textContent = LETTERS[i];
+      var label = document.createElement("span");
+      label.textContent = ans.text;
+      btn.appendChild(letter);
+      btn.appendChild(label);
+      btn.addEventListener("click", function(){ selectAnswer(ans.points); });
+      answersEl.appendChild(btn);
+    });
+
+    btnBack.style.visibility = idx === 0 ? "hidden" : "visible";
+  }
+
+  function selectAnswer(points){
+    state.responses[state.current] = { points: points };
+
+    if (state.current < TOTAL - 1){
+      state.current += 1;
+      renderQuestion();
+      // small delayed progress bar update for smooth animation feel
+      requestAnimationFrame(function(){
+        progressFill.style.width = ((state.current) / TOTAL) * 100 + "%";
+      });
+    } else {
+      progressFill.style.width = "100%";
+      setTimeout(function(){ switchScreen(screenQuiz, screenCapture); }, 200);
+    }
+  }
+
+  btnStart.addEventListener("click", function(){
+    state.current = 0;
+    renderQuestion();
+    switchScreen(screenIntro, screenQuiz);
+  });
+
+  btnBack.addEventListener("click", function(){
+    if (state.current > 0){
+      state.current -= 1;
+      renderQuestion();
+    }
+  });
+
+  var btnBackCapture = document.getElementById("btn-back-capture");
+  btnBackCapture.addEventListener("click", function(){
+    switchScreen(screenCapture, screenQuiz);
+  });
+
+  // ---------- Result ----------
+
+  var ringFill = document.getElementById("ring-fill");
+  var ringPercent = document.getElementById("ring-percent");
+  var resultTitle = document.getElementById("result-title");
+  var resultText = document.getElementById("result-text");
+  var breakdownList = document.getElementById("breakdown-list");
+  var ctaZone = document.getElementById("cta-zone");
+  var resultGreeting = document.getElementById("result-greeting");
+
+  var RING_RADIUS = 76;
+  var RING_CIRC = 2 * Math.PI * RING_RADIUS;
+  ringFill.style.strokeDasharray = RING_CIRC.toFixed(2);
+  ringFill.style.strokeDashoffset = RING_CIRC.toFixed(2);
+
+  function computeResult(){
+    var totalPoints = 0;
+    var perCategory = QUESTIONS.map(function(q, i){
+      var pts = state.responses[i] ? state.responses[i].points : 0;
+      totalPoints += pts;
+      return { category: q.category, icon: q.icon, points: pts };
+    });
+
+    var prepScore = Math.round(((MAX_POINTS - totalPoints) / MAX_POINTS) * 100);
+
+    var weak = perCategory
+      .filter(function(c){ return c.points > 0; })
+      .sort(function(a, b){ return b.points - a.points; })
+      .slice(0, 2);
+
+    return { prepScore: prepScore, perCategory: perCategory, weak: weak };
+  }
+
+  function indicatorFor(points){
+    if (points === 0) return { icon: "✅", label: "Point fort" };
+    if (points === 1) return { icon: "⚠️", label: "À affiner" };
+    return { icon: "❌", label: "Point faible" };
+  }
+
+  function tierMessage(prepScore){
+    if (prepScore >= 100){
+      return {
+        title: "Tu es une vraie pro du voyage avec ton chien ! 🏆",
+        text: "Franchement, chapeau. Tu as anticipé tous les points clés — Charly et moi, on est bluffés."
+      };
+    }
+    if (prepScore >= 90){
+      return {
+        title: "Tu es presque une pro du voyage avec Charly ! 🐾",
+        text: "Il ne te manque qu'un ou deux détails pour voyager l'esprit totalement léger."
+      };
+    }
+    if (prepScore >= 60){
+      return {
+        title: "Tu es sur la bonne voie !",
+        text: "Mais quelques zones d'ombre pourraient te jouer des tours le jour J si tu ne les anticipes pas."
+      };
+    }
+    return {
+      title: "Ne pars pas la fleur au fusil 🐶",
+      text: "Voyager avec ton chien peut vite devenir stressant si ces points ne sont pas anticipés — bonne nouvelle : tout est rattrapable."
+    };
+  }
+
+  function showResult(result){
+    // Ring animation
+    var offset = RING_CIRC - (result.prepScore / 100) * RING_CIRC;
+    ringPercent.textContent = result.prepScore + "%";
+
+    if (state.lead){
+      resultGreeting.textContent = state.lead.firstName + " & " + state.lead.dogName + " 🐾";
+    }
+
+    var msg = tierMessage(result.prepScore);
+    resultTitle.textContent = msg.title;
+    resultText.textContent = msg.text;
+
+    breakdownList.innerHTML = "";
+    result.perCategory.forEach(function(c){
+      var ind = indicatorFor(c.points);
+      var row = document.createElement("div");
+      row.className = "cat-row";
+      row.innerHTML =
+        '<span class="cat-icon-badge" aria-hidden="true">' + c.icon + '</span>' +
+        '<span class="cat-name">' + c.category + '</span>' +
+        '<span class="cat-indicator" title="' + ind.label + '" aria-label="' + ind.label + '">' + ind.icon + '</span>';
+      breakdownList.appendChild(row);
+    });
+
+    renderCta(result);
+
+    switchScreen(screenCapture, screenResult);
+
+    setTimeout(function(){
+      ringFill.style.strokeDashoffset = offset.toFixed(2);
+    }, 350);
+
+    window._lastResult = result;
+  }
+
+  // ---------- Lead capture ----------
+
+  var captureForm = document.getElementById("capture-form");
+  var fFirstname = document.getElementById("f-firstname");
+  var fDogname = document.getElementById("f-dogname");
+  var fEmail = document.getElementById("f-email");
+  var fWebsite = document.getElementById("f-website");
+  var captureError = document.getElementById("capture-error");
+  var btnCaptureSubmit = document.getElementById("btn-capture-submit");
+  var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function showCaptureError(msg){
+    captureError.textContent = msg;
+    captureError.hidden = false;
+  }
+  function hideCaptureError(){
+    captureError.hidden = true;
+  }
+
+  function submitLead(lead, result, honeypot){
+    var payload = {
+      firstName: lead.firstName,
+      dogName: lead.dogName,
+      email: lead.email,
+      score: result.prepScore,
+      weakCategories: result.weak.map(function(w){ return w.category; }),
+      website: honeypot,
+      quizUrl: window.location.href
+    };
+
+    var controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var timeoutId = controller ? setTimeout(function(){ controller.abort(); }, 6000) : null;
+
+    return fetch(LEAD_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller ? controller.signal : undefined
+    }).catch(function(err){
+      console.warn("Envoi du lead impossible :", err);
+    }).then(function(){
+      if (timeoutId) clearTimeout(timeoutId);
+    });
+  }
+
+  captureForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    hideCaptureError();
+
+    var firstName = fFirstname.value.trim();
+    var dogName = fDogname.value.trim();
+    var email = fEmail.value.trim();
+    var honeypot = fWebsite.value.trim();
+
+    if (!firstName || !dogName || !email){
+      showCaptureError("Merci de remplir les 3 champs pour débloquer ton résultat.");
+      return;
+    }
+    if (!EMAIL_PATTERN.test(email)){
+      showCaptureError("Cet email ne semble pas valide, tu peux vérifier ?");
+      return;
+    }
+
+    state.lead = { firstName: firstName, dogName: dogName, email: email };
+
+    var result = computeResult();
+
+    btnCaptureSubmit.disabled = true;
+    btnCaptureSubmit.textContent = "Un instant…";
+
+    submitLead(state.lead, result, honeypot).then(function(){
+      btnCaptureSubmit.disabled = false;
+      btnCaptureSubmit.textContent = "Je découvre mon résultat 🐾";
+      showResult(result);
+    });
+  });
+
+  function renderCta(result){
+    ctaZone.innerHTML = "";
+
+    if (result.prepScore >= 100){
+      var block = document.createElement("div");
+      block.className = "congrats-block";
+      block.innerHTML =
+        '<span class="emoji" aria-hidden="true">🏆🐾</span>' +
+        '<p><strong>Bravo, sincèrement !</strong> Tu gères déjà comme une pro le voyage en avion avec ton chien. Charly et moi, on est impressionnés.</p>' +
+        '<p style="margin-top:2px;">Tu gères déjà comme une pro — si tu veux quand même toutes nos astuces réunies au même endroit, ' +
+        '<a class="discreet-link" href="' + EBOOK_URL + '" target="_blank" rel="noopener">l\'ebook est ici</a>.</p>';
+      ctaZone.appendChild(block);
+      return;
+    }
+
+    var weakNames = result.weak.map(function(w){ return w.category; });
+    var focusLabel = weakNames.length ? weakNames.join(" et ") : "quelques détails";
+
+    var sell = document.createElement("div");
+    sell.className = "sell-block";
+
+    var chips = weakNames.map(function(n){ return '<span class="chip">' + n + '</span>'; }).join("");
+
+    sell.innerHTML =
+      '<div class="sell-eyebrow">🎯 Tes points à travailler</div>' +
+      '<div class="sell-focus">' + (chips || '<span class="chip">Un peu de tout</span>') + '</div>' +
+      '<p>Mon ebook <strong>« Comment voyager en Europe avec son compagnon à quatre pattes »</strong> couvre exactement ces points — pas à pas, avec Charly comme exemple concret, pour que tu n\'improvises rien le jour J.</p>' +
+      '<a class="btn btn-primary" href="' + EBOOK_URL + '" target="_blank" rel="noopener">Je me prépare avec l\'ebook 🐾</a>';
+
+    ctaZone.appendChild(sell);
+  }
+
+  btnRestart.addEventListener("click", function(){
+    state.current = 0;
+    state.responses = new Array(TOTAL).fill(null);
+    progressFill.style.width = "0%";
+    ringFill.style.strokeDashoffset = RING_CIRC.toFixed(2);
+    renderQuestion();
+    switchScreen(screenResult, screenQuiz);
+  });
+
+  // ---------- Share ----------
+
+  btnShare.addEventListener("click", function(){
+    var result = window._lastResult || computeResult();
+    var shareText = "J'ai obtenu " + result.prepScore + "% de préparation au quiz \"Es-tu prêt(e) à prendre l'avion avec ton chien ?\" de Julie & Charly 🐾✈️ Fais le test toi aussi :";
+    var shareUrl = window.location.href;
+
+    if (navigator.share){
+      navigator.share({
+        title: "Es-tu prêt(e) à prendre l'avion avec ton chien ?",
+        text: shareText,
+        url: shareUrl
+      }).catch(function(){ /* user cancelled, ignore */ });
+      return;
+    }
+
+    var fullText = shareText + " " + shareUrl;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(fullText).then(function(){
+        showToast("Lien copié dans le presse-papier ✅");
+      }).catch(function(){
+        fallbackCopy(fullText);
+      });
+    } else {
+      fallbackCopy(fullText);
+    }
+  });
+
+  function fallbackCopy(text){
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("Lien copié dans le presse-papier ✅");
+    } catch (e){
+      showToast("Copie manuelle : " + text.slice(0, 40) + "…");
+    }
+    document.body.removeChild(ta);
+  }
+
+  // ---------- Keyboard: allow Escape to go back a question ----------
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && screenQuiz.classList.contains("active") && state.current > 0){
+      state.current -= 1;
+      renderQuestion();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
