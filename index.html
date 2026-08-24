@@ -437,6 +437,14 @@
     border-radius:10px;
   }
 
+  .loading-text{
+    margin:24px 0;
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+
   /* ---------- Result ---------- */
   .result{
     gap:22px;
@@ -708,35 +716,14 @@
       </div>
     </section>
 
-    <!-- QUIZ -->
-    <section class="screen quiz" id="screen-quiz" aria-labelledby="q-text" hidden>
-      <button class="back-link" id="btn-back" type="button" aria-label="Revenir à la question précédente">← Retour</button>
-      <div class="progress-wrap">
-        <div class="progress-track" role="progressbar" id="progress-bar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Progression du quiz">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-label">
-          <span id="progress-text">Question 1 / 6</span>
-          <span id="progress-cat"></span>
-        </div>
-      </div>
-
-      <div class="q-card">
-        <div class="q-icon" id="q-icon" aria-hidden="true">📋</div>
-        <div class="q-category" id="q-category">Formalités</div>
-        <p class="q-text" id="q-text"></p>
-        <div class="answers" id="answers" role="group" aria-label="Choix de réponse"></div>
-      </div>
-    </section>
-
     <!-- CAPTURE -->
     <section class="screen capture" id="screen-capture" aria-labelledby="capture-title" hidden>
-      <button class="back-link" id="btn-back-capture" type="button" aria-label="Revenir à la dernière question">← Retour</button>
+      <button class="back-link" id="btn-back-capture" type="button" aria-label="Revenir à l'accueil">← Retour</button>
 
       <div class="capture-card">
         <div class="capture-icon" aria-hidden="true">🐾✉️</div>
-        <h1 id="capture-title">Ton résultat est prêt !</h1>
-        <p class="capture-lede">Dis-nous qui tu es pour le débloquer — et reçois par la même occasion les astuces voyage de Julie &amp; Charly.</p>
+        <h1 id="capture-title">On y va ?</h1>
+        <p class="capture-lede">Dis-nous qui tu es avant de commencer — tu recevras ton résultat personnalisé par email, avec les conseils de Julie &amp; Charly.</p>
 
         <form id="capture-form" novalidate>
           <div class="field">
@@ -761,8 +748,29 @@
 
           <p class="form-error" id="capture-error" role="alert" hidden></p>
 
-          <button class="btn btn-primary" type="submit" id="btn-capture-submit">Je découvre mon résultat 🐾</button>
+          <button class="btn btn-primary" type="submit" id="btn-capture-submit">Je démarre le quiz 🐾</button>
         </form>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="screen quiz" id="screen-quiz" aria-labelledby="q-text" hidden>
+      <button class="back-link" id="btn-back" type="button" aria-label="Revenir en arrière">← Retour</button>
+      <div class="progress-wrap">
+        <div class="progress-track" role="progressbar" id="progress-bar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Progression du quiz">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progress-text">Question 1 / 6</span>
+          <span id="progress-cat"></span>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-icon" id="q-icon" aria-hidden="true">📋</div>
+        <div class="q-category" id="q-category">Formalités</div>
+        <p class="q-text" id="q-text"></p>
+        <div class="answers" id="answers" role="group" aria-label="Choix de réponse"></div>
       </div>
     </section>
 
@@ -982,7 +990,13 @@
       answersEl.appendChild(btn);
     });
 
-    btnBack.style.visibility = idx === 0 ? "hidden" : "visible";
+  }
+
+  function showLoadingState(){
+    qCategory.textContent = "";
+    qText.textContent = "";
+    qIcon.textContent = "🐾";
+    answersEl.innerHTML = '<p class="loading-text">On prépare ton résultat…</p>';
   }
 
   function selectAnswer(points){
@@ -997,26 +1011,33 @@
       });
     } else {
       progressFill.style.width = "100%";
-      setTimeout(function(){ switchScreen(screenQuiz, screenCapture); }, 200);
+      showLoadingState();
+      setTimeout(function(){
+        var result = computeResult();
+        var lead = state.lead || { firstName: "", dogName: "", email: "" };
+        submitLead(lead, result, lead.honeypot || "").then(function(){
+          showResult(result);
+        });
+      }, 200);
     }
   }
 
   btnStart.addEventListener("click", function(){
-    state.current = 0;
-    renderQuestion();
-    switchScreen(screenIntro, screenQuiz);
+    switchScreen(screenIntro, screenCapture);
   });
 
   btnBack.addEventListener("click", function(){
     if (state.current > 0){
       state.current -= 1;
       renderQuestion();
+    } else {
+      switchScreen(screenQuiz, screenCapture);
     }
   });
 
   var btnBackCapture = document.getElementById("btn-back-capture");
   btnBackCapture.addEventListener("click", function(){
-    switchScreen(screenCapture, screenQuiz);
+    switchScreen(screenCapture, screenIntro);
   });
 
   // ---------- Result ----------
@@ -1110,7 +1131,7 @@
 
     renderCta(result);
 
-    switchScreen(screenCapture, screenResult);
+    switchScreen(screenQuiz, screenResult);
 
     setTimeout(function(){
       ringFill.style.strokeDashoffset = offset.toFixed(2);
@@ -1127,7 +1148,6 @@
   var fEmail = document.getElementById("f-email");
   var fWebsite = document.getElementById("f-website");
   var captureError = document.getElementById("capture-error");
-  var btnCaptureSubmit = document.getElementById("btn-capture-submit");
   var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function showCaptureError(msg){
@@ -1182,18 +1202,12 @@
       return;
     }
 
-    state.lead = { firstName: firstName, dogName: dogName, email: email };
+    state.lead = { firstName: firstName, dogName: dogName, email: email, honeypot: honeypot };
 
-    var result = computeResult();
-
-    btnCaptureSubmit.disabled = true;
-    btnCaptureSubmit.textContent = "Un instant…";
-
-    submitLead(state.lead, result, honeypot).then(function(){
-      btnCaptureSubmit.disabled = false;
-      btnCaptureSubmit.textContent = "Je découvre mon résultat 🐾";
-      showResult(result);
-    });
+    state.current = 0;
+    state.responses = new Array(TOTAL).fill(null);
+    renderQuestion();
+    switchScreen(screenCapture, screenQuiz);
   });
 
   function renderCta(result){
